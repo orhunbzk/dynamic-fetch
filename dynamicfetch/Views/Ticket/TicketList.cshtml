@@ -1,0 +1,38 @@
+@model TicketViewModel
+
+@{
+    ViewData["Title"] = "Ticket List";
+}
+
+<div class="card-body">
+    <table class="table table-striped" id="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Ticket</th>
+            <th>Body</th>
+            <th>Email</th>
+        </tr>
+        </thead>
+        <tbody>
+        @if (Model.Tickets.Any())
+        {
+            @foreach (var ticket in Model.Tickets)
+            {
+                var matchingDto = Model.TicketDto.FirstOrDefault(dto => dto.name == ticket.UserName);
+                if (matchingDto != null)
+                {
+                    <tr id="@ticket.Id">
+                        <td>@ticket.Id</td>
+                        <td>@ticket.UserName</td>
+                        <td>@ticket.Content</td>
+                        <td>@matchingDto.body</td>
+                        <td>@matchingDto.email</td>
+                    </tr>
+                }
+            }
+        }
+        </tbody>
+    </table>
+</div>

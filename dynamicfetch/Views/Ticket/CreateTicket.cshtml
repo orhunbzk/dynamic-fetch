@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Create Ticket";
+}
+
+<div class="container mt-4">
+    <form asp-controller="Ticket" asp-action="CreateTicket" method="post" class="mt-4">
+        <input type="text" id="userId" hidden/>
+        <div class="mb-3">
+            <label for="userName" class="form-label">Müşteri Adı</label>
+            <select class="form-select" id="userName" name="userName" required>
+                <option value="">Seç...</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="content" class="form-label">Şikayeti</label>
+            <textarea rows="4" class="form-control" id="content" name="content" required ></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+    </form>
+</div>
+
+<script>
+      
+    $(document).ready(function () {
+        JSFormLoad.FillDropdown();
+    });
+     
+    //encapsulate
+    var JSFormLoad = (function () {  
+        //fill the dropdowns
+            var _fillDropdown = function () {
+    
+                $.ajax({
+                    type: "GET",
+                    url: "https://jsonplaceholder.typicode.com/posts/1/comments",
+                    dataType: "json",
+                    async: false,
+                    success: function (response) {   
+                        if (Object.keys(response).length > 0) {
+                            $.each(response, function (index, obj) {
+                                $("#userName").append('<option value="' + obj.name + '">' + obj.name + '</option>');
+                            });
+                        }                   
+                    },
+                    error: function (req, status, error) {
+                        console.log(req);
+                    },
+                });
+            };
+            
+            return {
+                FillDropdown: _fillDropdown,                      
+            };
+    })();
+</script>
