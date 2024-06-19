@@ -1,0 +1,134 @@
+@{
+    ViewData["Title"] = "Ticket List Animation";
+}
+
+<div class="row">
+    <div class="col-md-1">
+        <div id="loadingSpinner" class="spinner-border text-primary"  role="status">
+            <span class="sr-only"></span>
+        </div>
+    </div>
+    <div class="col-md-11">
+        <div class="card-body">
+            <table class="table table-striped" id="table">
+                <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Kullanıcı</th>
+                            <th>Ticket</th>
+                            <th>Body</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Rows will be added here dynamically -->
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+       
+
+    $(document).ready(function() {
+
+        $('#loadingSpinner').show();
+
+        //first ajax retrieve data from the db
+        let ticketsFromDb = JSFormLoad.GetTicketsFromDb();
+
+        ticketsFromDb.forEach(function(ticket) {
+            var row = '<tr>';
+            row += '<td>' + ticket.id + '</td>';
+            row += '<td>' + ticket.userName + '</td>';
+            row += '<td>' + ticket.content + '</td>';
+            row += '</tr>';
+            $('#tableBody').append(row);
+        }); 
+
+
+        //second ajax retrieve data from third party rest api
+        let apiData = JSFormLoad.GetApiData();  
+
+        //simulate 1 sec
+        setTimeout(function () {
+
+            //dynamically create and manipulate dom object 
+            $('#tableBody tr').each(function(index, row) {  
+                let columns = $(row).find('td');
+                //name column
+                let secondColumnData = $(columns[1]).text(); 
+                
+                let filteredData = apiData.filter(function(item) {
+                   return item.name === secondColumnData; 
+                });
+
+                if (filteredData.length > 0) {
+                    // Append a new column 
+                    $(row).append('<td>' + filteredData[0].body + '</td>'); 
+                    $(row).append('<td>' + filteredData[0].email + '</td>'); 
+                }
+            }); 
+
+           //hide loading spinner
+           $('#loadingSpinner').hide(); 
+        }, 1000);  
+
+    });
+
+
+    //encapsulate
+    var JSFormLoad = (function () {  
+        var _getTicketsFromDb = function () {
+
+            let data = [];
+
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("GetTicketsFromDb","Ticket")",
+                dataType: "json",
+                async: false,
+                success: function (response) {   
+                    if (Object.keys(response).length > 0) {
+                        data = response;
+                    }                   
+                },
+                error: function (req, status, error) {
+                    console.log(req);
+                },
+            });
+
+            return data;
+        };
+
+        var _getApiData = function () {
+
+            let data = [];
+
+            $.ajax({
+                type: "GET",
+                url: "https://jsonplaceholder.typicode.com/posts/1/comments",
+                dataType: "json",
+                async: false,
+                success: function (response) {   
+                    if (Object.keys(response).length > 0) {
+                        data = response;
+                    }                   
+                },
+                error: function (req, status, error) {
+                    console.log(req);
+                },
+            });
+
+            return data;
+        };
+        
+        return {
+            GetTicketsFromDb: _getTicketsFromDb,
+            GetApiData: _getApiData                    
+        };
+    })();
+    </script>
